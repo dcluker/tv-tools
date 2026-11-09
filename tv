@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# tv <name|all> <command> [args] [--force]      e.g.  ./tv bedroom status    ./tv all status    ./tv living volume up 3
+. "$(dirname "$0")/lib.sh"
+FORCE=0; args=()
+for a in "$@"; do [ "$a" = "--force" ] && FORCE=1 || args+=("$a"); done
+set -- "${args[@]}"
+who="${1:-}"; cmd="${2:-}"; shift 2 2>/dev/null || true
+if [ -z "$who" ] || [ -z "$cmd" ] || [ ! -f "$HERE/commands/$cmd.sh" ]; then
+  echo "usage: ./tv <$(tv_names | tr '\n' '|')all> <command> [args] [--force]"; echo "commands:"
+  for f in "$HERE"/commands/*.sh; do printf '  %-14s %s\n' "$(basename "$f" .sh)" "$(sed -n '1s/^# *//p' "$f")"; done; exit 2
+fi
+[ "$who" = all ] && targets="$(tv_names)" || targets="$who"
+rc=0
+for NAME in $targets; do
+  IP="$(tv_ip "$NAME")"; [ -n "$IP" ] || { echo "unknown TV '$NAME' (see tvs.env)"; rc=2; continue; }
+  if ! tv_connect "$IP"; then echo "[$NAME] $IP not reachable (off? a fully-off Fire TV has no network)"; rc=1; continue; fi
+  export NAME IP FORCE; ( . "$HERE/lib.sh"; . "$HERE/commands/$cmd.sh" "$@" ) || rc=1
+done
+exit $rc
