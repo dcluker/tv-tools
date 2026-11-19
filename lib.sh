@@ -1,6 +1,7 @@
 # Shared helpers. Sourced by ./tv and every command. macOS-friendly bash.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADB="${ADB:-$(command -v adb || echo /opt/homebrew/bin/adb)}"
+# shellcheck disable=SC2034  # used by commands/screenshot.sh
 SHOTS="${TV_SHOTS:-$HOME/Desktop/tv-shots}"
 
 tv_ip() { grep -E "^$1=" "$HERE/tvs.env" | head -1 | cut -d= -f2; }

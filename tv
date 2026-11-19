@@ -14,6 +14,8 @@ rc=0
 for NAME in $targets; do
   IP="$(tv_ip "$NAME")"; [ -n "$IP" ] || { echo "unknown TV '$NAME' (see tvs.env)"; rc=2; continue; }
   if ! tv_connect "$IP"; then echo "[$NAME] $IP not reachable (off? a fully-off Fire TV has no network)"; rc=1; continue; fi
-  export NAME IP FORCE; ( . "$HERE/lib.sh"; . "$HERE/commands/$cmd.sh" "$@" ) || rc=1
+  export NAME IP FORCE
+  # shellcheck disable=SC1090  # per-command file picked at runtime
+  ( . "$HERE/lib.sh"; . "$HERE/commands/$cmd.sh" "$@" ) || rc=1
 done
 exit $rc

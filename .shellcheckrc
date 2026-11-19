@@ -1,0 +1,1 @@
+shell=bash   # commands/*.sh are sourced by ./tv and have no shebang
